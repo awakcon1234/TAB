@@ -91,5 +91,6 @@ public class PlayerJoinResponse implements IncomingMessage {
         PlayerPlaceholderImpl.bulkUpdateValues(player, playerPlaceholderUpdates);
         player.setGamemode(gameMode);
         player.setBridgeConnected(true);
+        player.expansionData.resendAllValues();
     }
 }

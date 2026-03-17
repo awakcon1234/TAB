@@ -104,7 +104,11 @@ public class VelocityEventListener implements EventListener<Player> {
         if (TAB.getInstance().isPluginDisabled()) return;
         if (!(e.getTarget() instanceof Player player)) return;
         if (!(e.getSource() instanceof ServerConnection connection)) return;
-        if (player.getCurrentServer().orElse(null) != connection) return;
+        if (player.getCurrentServer().orElse(null) != connection) {
+            TAB.getInstance().debug("Ignoring stale bridge message for " + player.getUsername() + " from " + connection.getServerInfo().getName() +
+                    " because current backend is " + player.getCurrentServer().map(s -> s.getServerInfo().getName()).orElse("none"));
+            return;
+        }
         pluginMessage(player.getUniqueId(), e.getData());
     }
 

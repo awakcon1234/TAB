@@ -13,6 +13,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * General collection of variables and functions shared between all placeholder types
@@ -40,9 +41,9 @@ public abstract class TabPlaceholder implements Placeholder {
      * mutual tracking allows faster parent placeholder changes when a nested
      * placeholder changed value.
      */
-    protected final List<TabPlaceholder> parents = new ArrayList<>();
+    protected final List<TabPlaceholder> parents = new CopyOnWriteArrayList<>();
 
-    private final List<TabPlaceholder> children = new ArrayList<>();
+    private final List<TabPlaceholder> children = new CopyOnWriteArrayList<>();
 
     /** Set of features using this placeholder, used to call refresh on them */
     private final Set<RefreshableFeature> usedByFeatures = Collections.synchronizedSet(new HashSet<>());
