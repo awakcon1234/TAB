@@ -1,8 +1,11 @@
 package me.neznamy.tab.platforms.velocity;
 
+import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.Player;
+import me.neznamy.tab.shared.cpu.CpuManager;
 import me.neznamy.tab.shared.chat.component.TabComponent;
 import me.neznamy.tab.shared.proxy.ProxyTabPlayer;
+import me.neznamy.tab.shared.proxy.message.outgoing.OutgoingMessage;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -50,9 +53,21 @@ public class VelocityTabPlayer extends ProxyTabPlayer {
     }
 
     @Override
+    public void sendPluginMessage(@NotNull OutgoingMessage message) {
+        getPlayer().getCurrentServer().ifPresent(currentServer ->
+                CpuManager.getPluginMessageEncodeThread().execute(new VelocityPluginMessageEncodeTask(this, currentServer, message))
+        );
+    }
+
+    @Override
     public void sendPluginMessage(byte[] message) {
+        getPlayer().getCurrentServer().ifPresent(currentServer -> sendPluginMessage(currentServer, message));
+    }
+
+    public void sendPluginMessage(@NotNull ServerConnection connection, byte[] message) {
         try {
-            getPlayer().getCurrentServer().ifPresent(currentServer -> currentServer.sendPluginMessage(getPlatform().getMCI(), message));
+            if (getPlayer().getCurrentServer().orElse(null) != connection) return;
+            connection.sendPluginMessage(getPlatform().getMCI(), message);
         } catch (IllegalStateException VelocityBeingVelocityException) {
             // java.lang.IllegalStateException: Not connected to server!
         }
