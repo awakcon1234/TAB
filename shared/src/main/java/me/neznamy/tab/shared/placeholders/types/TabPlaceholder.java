@@ -6,6 +6,7 @@ import me.neznamy.tab.api.placeholder.Placeholder;
 import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.shared.TabConstants;
 import me.neznamy.tab.shared.features.PlaceholderManagerImpl;
+import me.neznamy.tab.shared.placeholders.PlaceholderReference;
 import me.neznamy.tab.shared.features.types.RefreshableFeature;
 import me.neznamy.tab.shared.placeholders.PlaceholderReplacementPattern;
 import me.neznamy.tab.shared.platform.TabPlayer;
@@ -111,7 +112,9 @@ public abstract class TabPlaceholder implements Placeholder {
             if (s.equals(identifier)) continue; // Prevent infinite loop when placeholder returns itself
             if (s.startsWith("%rel_")) continue; // Relational placeholders are handled separately
             if ((identifier.startsWith("%sync:") && ("%" + identifier.substring(6)).equals(s))) continue; // Self, but as sync variant
-            TabPlaceholder nested = TAB.getInstance().getPlaceholderManager().getPlaceholder(s);
+            PlaceholderReference reference = TAB.getInstance().getPlaceholderManager().getPlaceholderRaw(s);
+            if (reference == null) continue;
+            TabPlaceholder nested = reference.getHandle();
             nested.addParent(this);
             addChild(nested);
             string = string.replace(s, nested.parse(player));

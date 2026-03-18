@@ -106,6 +106,7 @@ public class VelocityTabPlayer extends ProxyTabPlayer {
         try {
             if (getPlayer().getCurrentServer().orElse(null) != connection) return;
             if (connection instanceof VelocityServerConnection velocityConnection && !isBackendReady(velocityConnection)) return;
+            VelocityBridgeMessageLogger.logOutgoing(this, connection.getServerInfo().getName(), message);
             connection.sendPluginMessage(getPlatform().getMCI(), message);
         } catch (IllegalStateException VelocityBeingVelocityException) {
             // java.lang.IllegalStateException: Not connected to server!
