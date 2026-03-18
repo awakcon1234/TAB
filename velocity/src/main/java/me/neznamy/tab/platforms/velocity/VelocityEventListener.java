@@ -19,7 +19,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
 
 /**
  * The core for Velocity forwarding events into all enabled features
@@ -73,29 +72,23 @@ public class VelocityEventListener implements EventListener<Player> {
     public void onConnect(@NotNull ServerPostConnectEvent e) {
         TAB tab = TAB.getInstance();
         if (tab.isPluginDisabled()) return;
-        ((VelocityPlatform) tab.getPlatform()).getPlugin().getServer().getScheduler()
-                .buildTask(((VelocityPlatform) tab.getPlatform()).getPlugin(), () -> {
-                    if (tab.isPluginDisabled()) return;
-                    tab.getCPUManager().runTask(() -> {
-                        TabPlayer player = tab.getPlayer(e.getPlayer().getUniqueId());
-                        if (player == null) {
-                            players.put(e.getPlayer(), e.getPlayer().getUniqueId());
-                            tab.getFeatureManager().onJoin(createPlayer(e.getPlayer()));
-                        } else {
-                            if (!(player.getScoreboard() instanceof VelocityScoreboard)) player.getScoreboard().resend();
-                            tab.getFeatureManager().onServerChange(
-                                    player.getUniqueId(),
-                                    Server.byName(e.getPlayer().getCurrentServer().map(s -> s.getServerInfo().getName()).orElse("null"))
-                            );
-                            tab.getFeatureManager().onTabListClear(player);
-                            if (player.getVersionId() >= ProtocolVersion.V1_20_2.getNetworkId()) {
-                                ((SafeBossBar<?>)player.getBossBar()).unfreezeAndSynchronize();
-                            }
-                        }
-                    });
-                })
-                .delay(1, TimeUnit.SECONDS)
-                .schedule();
+        tab.getCPUManager().runTask(() -> {
+            TabPlayer player = tab.getPlayer(e.getPlayer().getUniqueId());
+            if (player == null) {
+                players.put(e.getPlayer(), e.getPlayer().getUniqueId());
+                tab.getFeatureManager().onJoin(createPlayer(e.getPlayer()));
+            } else {
+                if (!(player.getScoreboard() instanceof VelocityScoreboard)) player.getScoreboard().resend();
+                tab.getFeatureManager().onServerChange(
+                        player.getUniqueId(),
+                        Server.byName(e.getPlayer().getCurrentServer().map(s -> s.getServerInfo().getName()).orElse("null"))
+                );
+                tab.getFeatureManager().onTabListClear(player);
+                if (player.getVersionId() >= ProtocolVersion.V1_20_2.getNetworkId()) {
+                    ((SafeBossBar<?>)player.getBossBar()).unfreezeAndSynchronize();
+                }
+            }
+        });
     }
 
     /**
